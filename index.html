@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kistpay - Financing Calculator</title>
+</head>
+<body>
+    <style>
+        html *{
+            font-family: sans-serif;
+        }
+
+        body,p, h1, h2, h3, h4 {
+            color: #434343;
+        }
+    </style>
+    <h3>Financing Plan Calculator</h3>
+    <div id="mobilePrice">
+        <p><strong>Select Mobile Price</strong></p>
+        <input type="range" min="10000" max="60000" value="19500" class="slider" id="sliderPhonePrice">
+        <p>Rs. <span id="valuePhonePrice"></span></p>
+    </div>
+    <br>
+    <div>
+       <label for="downpaymentPercent">Select Downpayment Percent: </label>
+        <select name="downpaymentPercent" id="downpaymentPercent">
+            <option value="0.2">20%</option>
+            <option value="0.3">30%</option>
+            <option value="0.4">40%</option>
+            <option value="1">100%</option>
+        </select>
+    </div>
+    <br>
+    <div>
+        <label for="tenure">Select Financing Duration: </label>
+        <select name="tenure" id="tenure">
+            <option value="3">3 Months</option>
+            <option value="6">6 Months</option>
+        </select>
+    </div>
+    <br>
+    <div>
+        <label for="insuranceDuration">Select Insurance Duration: </label> 
+        <select name="insuranceDuration" id="insuranceDuration">
+            <option value="3">3 Months</option>
+            <option value="6">6 Months</option>
+            <option value="9">9 Months</option>
+            <option value="12">12 Months</option>
+        </select><br><br>
+        * for financing, insurance duration must be equal or greater than to financing duration
+    </div>
+    <br><br>
+    <button id="calc" onClick="calculate()">Calculate</button><br><br>
+    <hr>
+    <div id="output">
+        <p><strong>Downpayment: </strong> Rs.<span id="downpaymentOutput"></span></p>
+        <p><strong>Processing Charges:</strong> Rs.<span id="processingChargesOutput"></span></p>
+        <p><strong>Insurance Charges:</strong> Rs.<span id="insuranceChargesOutput"></span></p>
+        <p><strong>Financing Charges:</strong> Rs.<span id="financingChargesOutput"></span></p>
+        <p><strong>Total Upfront:</strong> Rs.<span id="totalUpfrontOutput"></span> (including insurance and processing charges)</p>
+        <p><strong>Monthly Installment:</strong> Rs.<span id="monthlyOutput"></span></p>
+    </div>
+    <script>
+        var processing_charges = 0;
+        var financing_charges_20_30_x_3 = 0.075;
+        var financing_charges_20_30_x_6 = 0.15;
+        var financing_charges_40_x_3 = 0;
+        var financing_charges_40_x_6 = 0.15;
+        var insurance_10k_3 = 0.025;
+        var insurance_10k_6 = 0.035;
+        var insurance_10k_9 = 0.045;
+        var insurance_10k_12 = 0.05;
+        var insurance_20k_3 = 0.035;
+        var insurance_20k_6 = 0.055;
+        var insurance_20k_9 = 0.065;
+        var insurance_20k_12 = 0.07;
+        var insurance_30k_3 = 0.035;
+        var insurance_30k_6 = 0.055;
+        var insurance_30k_9 = 0.065;
+        var insurance_30k_12 = 0.07;
+        var insurance_40k_3 = 0.035;
+        var insurance_40k_6 = 0.055;
+        var insurance_40k_9 = 0.075;
+        var insurance_40k_12 = 0.08;
+        
+        // Phone price update on slider
+        var sliderPhonePrice = document.getElementById("sliderPhonePrice");
+        sliderPhonePrice.step = 500;
+        var outputPhonePrice = document.getElementById("valuePhonePrice");
+        outputPhonePrice.innerHTML = sliderPhonePrice.value; 
+        sliderPhonePrice.oninput = function() {
+        outputPhonePrice.innerHTML = this.value;
+        }
+        calc.onclick = function(){
+            
+            // Calculating downpayment
+            downpaymentPercent = document.querySelector('#downpaymentPercent');
+            downpaymentOutput = document.getElementById("downpaymentOutput");
+            downpaymentValue = downpaymentPercent.value * sliderPhonePrice.value;
+            downpaymentOutput.innerHTML = downpaymentValue;
+
+            // Getting financing tenure
+            financingTenure = document.querySelector('#tenure');
+
+            // Calculate processing charges
+            var processingChargesValue = 0;
+            if (downpaymentPercent.value == 0.4 && financingTenure.value == 3){
+                processing_charges = 0
+            } else if (downpaymentPercent.value > 0.4){
+                processing_charges = 0
+            } else {
+                processing_charges = 0.025
+            };
+            processingChargesValue = processing_charges * sliderPhonePrice.value;
+            processingChargesOutput = document.getElementById("processingChargesOutput");
+            processingChargesOutput.innerHTML = Math.round(processingChargesValue);
+
+            // Calculating insurance charges
+            insuranceDuration = document.querySelector('#insuranceDuration');
+            var insuranceChargesValue = 0;
+            var insurancePercent = 0;
+            if (sliderPhonePrice.value <= 10000 && insuranceDuration.value == 3){
+                insurancePercent = insurance_10k_3
+            } else if (sliderPhonePrice.value <=10000 && insuranceDuration.value == 6) {
+                insurancePercent = insurance_10k_6
+            } else if (sliderPhonePrice.value <=10000 && insuranceDuration.value == 9) {
+                insurancePercent = insurance_10k_9
+            } else if (sliderPhonePrice.value <=10000 && insuranceDuration.value == 12) {
+                insurancePercent = insurance_10k_12
+            } else if (sliderPhonePrice.value  > 10000 && sliderPhonePrice.value <=20000 && insuranceDuration.value == 3) {
+                insurancePercent = insurance_20k_3
+            } else if (sliderPhonePrice.value  > 10000 && sliderPhonePrice.value <=20000 && insuranceDuration.value == 6) {
+                insurancePercent = insurance_20k_6
+            } else if (sliderPhonePrice.value  > 10000 && sliderPhonePrice.value <=20000 && insuranceDuration.value == 9) {
+                insurancePercent = insurance_20k_9
+            } else if (sliderPhonePrice.value  > 10000 && sliderPhonePrice.value <=20000 && insuranceDuration.value == 12) {
+                insurancePercent = insurance_20k_12
+            } else if (sliderPhonePrice.value  > 20000 && sliderPhonePrice.value <=30000 && insuranceDuration.value == 3) {
+                insurancePercent = insurance_30k_3
+            } else if (sliderPhonePrice.value  > 20000 && sliderPhonePrice.value <=30000 && insuranceDuration.value == 6) {
+                insurancePercent = insurance_30k_6
+            } else if (sliderPhonePrice.value  > 20000 && sliderPhonePrice.value <=30000 && insuranceDuration.value == 9) {
+                insurancePercent = insurance_30k_9
+            } else if (sliderPhonePrice.value  > 20000 && sliderPhonePrice.value <=30000 && insuranceDuration.value == 12) {
+                insurancePercent = insurance_30k_12
+            } else if (sliderPhonePrice.value  > 30000 && insuranceDuration.value == 3) {
+                insurancePercent = insurance_40k_3
+            } else if (sliderPhonePrice.value  > 30000 && insuranceDuration.value == 6) {
+                insurancePercent = insurance_40k_6
+            } else if (sliderPhonePrice.value  > 30000 && insuranceDuration.value == 9) {
+                insurancePercent = insurance_40k_9
+            } else if (sliderPhonePrice.value  > 30000 && insuranceDuration.value == 12) {
+                insurancePercent = insurance_40k_12
+            }else {
+                insurancePercent = 0
+            };
+            insuranceChargesOutput = document.getElementById("insuranceChargesOutput");
+            insuranceChargesValue = sliderPhonePrice.value * insurancePercent;
+            insuranceChargesOutput.innerHTML = Math.round(insuranceChargesValue);
+
+            // Calculating financing charges
+            var financingPercent = 0;
+            var financingChargesValue = 0;
+
+            if (downpaymentPercent.value < 0.4){
+                if (financingTenure.value == 3) {
+                    financingPercent = financing_charges_20_30_x_3
+                } else {
+                    financingPercent = financing_charges_20_30_x_6
+                }
+            } else if (downpaymentPercent.value == 0.4) {
+                if (financingTenure.value == 3) {
+                    financingPercent = financing_charges_40_x_3
+                } else {
+                    financingPercent = financing_charges_40_x_6
+                }
+            } else {
+                financingPercent = 0
+            };
+
+            financingChargesOutput = document.getElementById("financingChargesOutput");
+            financingChargesValue = (sliderPhonePrice.value - downpaymentValue)  * financingPercent;
+            financingChargesOutput.innerHTML = Math.round(financingChargesValue);
+
+            // Calculating total upfront
+            var totalUpfrontValue = 0;
+            totalUpfrontOutput = document.getElementById("totalUpfrontOutput");
+            totalUpfrontValue = downpaymentValue + processingChargesValue + insuranceChargesValue;
+            totalUpfrontOutput.innerHTML = Math.round(totalUpfrontValue);
+
+            // Calculating Monthly
+            var monthlyValue = 0;
+            monthlyOutput = document.getElementById("monthlyOutput");
+            if (downpaymentPercent.value == 1) {
+                monthlyValue = 0
+            } else {
+                monthlyValue = (sliderPhonePrice.value - downpaymentValue + financingChargesValue)/financingTenure.value
+            };
+            monthlyOutput.innerHTML = Math.round(monthlyValue);
+        }
+    </script>
+</body>
+</html>
